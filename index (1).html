@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio – Erick-Samuel Franz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --beige:       #f5f0e8;
+      --beige-dark:  #e8e0d0;
+      --beige-mid:   #d9cfbb;
+      --text:        #1a1a18;
+      --text-light:  #4a4640;
+      --accent:      #8b7355;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--beige);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    header {
+      text-align: center;
+      padding: 56px 20px 36px;
+      border-bottom: 1px solid var(--beige-mid);
+    }
+
+    header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(3rem, 8vw, 6rem);
+      letter-spacing: 0.06em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    header p {
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-top: 12px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 32px 0;
+    }
+
+    .gallery-row {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .slideshow-wrap {
+      position: relative;
+      background: var(--beige-dark);
+      border: 1px solid var(--beige-mid);
+      overflow: hidden;
+      aspect-ratio: 16/10;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.65s cubic-bezier(.4,0,.2,1),
+                  transform 0.65s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+       background: var(--beige-dark);
+    }
+
+    .slide-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--beige-dark);
+      color: var(--text-light);
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      gap: 8px;
+    }
+
+    .slide-placeholder span.num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      color: var(--beige-mid);
+    }
+
+    .slide-counter {
+      position: absolute;
+      bottom: 14px;
+      right: 16px;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.75);
+      background: rgba(0,0,0,0.28);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--beige-mid);
+      transition: background 0.3s, transform 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.35);
+    }
+
+    .portrait-wrap {
+  position: relative;
+  background: var(--beige-dark);
+  border: 1px solid var(--beige-mid);
+  overflow: hidden;
+  aspect-ratio: 3/4;
+}
+
+.portrait-slideshow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.portrait-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.65s cubic-bezier(.4,0,.2,1),
+              transform 0.65s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+
+.portrait-slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.portrait-slide.exit {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+
+.portrait-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--beige-dark);
+}
+
+    .portrait-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      gap: 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+    }
+
+    .portrait-placeholder .icon {
+      font-size: 2.5rem;
+      color: var(--beige-mid);
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: var(--beige-mid);
+      margin: 52px auto;
+    }
+
+    .audio-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .audio-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .audio-item {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      align-items: center;
+      gap: 18px;
+      background: var(--beige-dark);
+      border: 1px solid var(--beige-mid);
+      padding: 18px 22px;
+      transition: border-color 0.25s;
+    }
+
+    .audio-item.playing {
+      border-color: var(--accent);
+    }
+
+    .play-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover,
+    .audio-item.playing .play-btn {
+      background: var(--accent);
+      color: var(--beige);
+    }
+
+    .play-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .audio-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .audio-name {
+      font-size: 0.88rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--beige-mid);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .audio-time {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .volume-corner {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--beige-dark);
+      border: 1px solid var(--beige-mid);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .volume-corner svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    #volume-slider {
+      -webkit-appearance: none;
+      width: 100px;
+      height: 2px;
+      background: var(--beige-mid);
+      outline: none;
+      cursor: pointer;
+    }
+
+    #volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    @media (max-width: 760px) {
+      .gallery-row {
+        grid-template-columns: 1fr;
+      }
+
+      .portrait-wrap {
+        aspect-ratio: 4/3;
+        max-height: 300px;
+      }
+
+      .audio-item {
+        grid-template-columns: 44px 1fr;
+      }
+
+      .audio-time {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Portfolio</h1>
+  <p>Erick-Samuel Franz</p>
+</header>
+
+<main>
+
+  <div class="gallery-row">
+
+    <div>
+      <div class="slideshow-wrap" id="slideshow"></div>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="portrait-wrap">
+  <div class="portrait-slideshow" id="portrait-slideshow"></div>
+</div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <section class="audio-section">
+    <h2>Klangarbeiten</h2>
+    <div class="audio-list" id="audio-list"></div>
+  </section>
+
+</main>
+
+<div class="volume-corner">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+  </svg>
+
+  <input
+    type="range"
+    id="volume-slider"
+    min="0"
+    max="1"
+    step="0.01"
+    value="0.8"
+  />
+</div>
+
+<script>
+  const SLIDE_COUNT = 16;
+  const PORTRAIT_COUNT = 4;
+
+  const AUDIO_NAMES = [
+    { name: 'Lied1', ext: 'mpeg' },
+    { name: 'Lied2', ext: 'mp3' },
+    { name: 'Lied3', ext: 'mp3' },
+    { name: 'Lied4', ext: 'wav' },
+  ];
+
+  const FOLDER = 'portfolio-screens/';
+  const SLIDE_DELAY = 3000;
+
+  const ssWrap = document.getElementById('slideshow');
+  const dotsEl = document.getElementById('dots');
+
+  let current = 0;
+  let timer;
+
+  const slideExt = i => i <= 5 ? 'jpeg' : 'png';
+
+  for (let i = 1; i <= SLIDE_COUNT; i++) {
+    const ext = slideExt(i);
+
+    const div = document.createElement('div');
+    div.className = 'slide' + (i === 1 ? ' active' : '');
+
+    div.innerHTML = `
+      <img
+        src="${FOLDER}Bild${i}.${ext}"
+        alt="Bild ${i}"
+        onerror="this.parentElement.innerHTML='<div class=\\'slide-placeholder\\'><span class=\\'num\\'>${i}</span><span>Bild ${i}</span></div>'"
+      />
+    `;
+
+    ssWrap.appendChild(div);
+
+    const dot = document.createElement('button');
+
+    dot.className = 'dot' + (i === 1 ? ' active' : '');
+    dot.setAttribute('aria-label', `Bild ${i}`);
+
+    dot.addEventListener('click', () => goTo(i - 1));
+
+    dotsEl.appendChild(dot);
+  }
+
+  const counter = document.createElement('div');
+
+  counter.className = 'slide-counter';
+  counter.textContent = `1 / ${SLIDE_COUNT}`;
+
+  ssWrap.appendChild(counter);
+
+  const slides = ssWrap.querySelectorAll('.slide');
+  const dots = dotsEl.querySelectorAll('.dot');
+
+  function goTo(idx) {
+    const prev = current;
+
+    slides[prev].classList.add('exit');
+    slides[prev].classList.remove('active');
+    dots[prev].classList.remove('active');
+
+    current = idx;
+
+    slides[current].classList.remove('exit');
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+
+    counter.textContent = `${current + 1} / ${SLIDE_COUNT}`;
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit');
+    }, 700);
+  }
+
+  function next() {
+    goTo((current + 1) % SLIDE_COUNT);
+  }
+
+  function startTimer() {
+    clearInterval(timer);
+    timer = setInterval(next, SLIDE_DELAY);
+  }
+
+  startTimer();
+  const portraitWrap = document.getElementById('portrait-slideshow');
+
+let portraitCurrent = 0;
+let portraitTimer;
+
+const portraitExt = i => i <= 5 ? 'jpeg' : 'png';
+
+for (let i = 1; i <= PORTRAIT_COUNT; i++) {
+  const ext = portraitExt(i);
+
+  const div = document.createElement('div');
+  div.className = 'portrait-slide' + (i === 1 ? ' active' : '');
+
+  div.innerHTML = `
+    <img
+      src="${FOLDER}Portrait${i}.${ext}"
+      alt="Portrait ${i}"
+      onerror="this.parentElement.innerHTML='<div class=\\'portrait-placeholder\\'><span class=\\'icon\\'>✕</span><span>Portrait ${i}</span></div>'"
+    />
+  `;
+
+  portraitWrap.appendChild(div);
+}
+
+const portraitSlides = portraitWrap.querySelectorAll('.portrait-slide');
+
+function goToPortrait(idx) {
+  const prev = portraitCurrent;
+
+  portraitSlides[prev].classList.add('exit');
+  portraitSlides[prev].classList.remove('active');
+
+  portraitCurrent = idx;
+
+  portraitSlides[portraitCurrent].classList.remove('exit');
+  portraitSlides[portraitCurrent].classList.add('active');
+
+  setTimeout(() => {
+    portraitSlides[prev].classList.remove('exit');
+  }, 700);
+}
+
+function nextPortrait() {
+  goToPortrait((portraitCurrent + 1) % PORTRAIT_COUNT);
+}
+
+function startPortraitTimer() {
+  clearInterval(portraitTimer);
+  portraitTimer = setInterval(nextPortrait, SLIDE_DELAY);
+}
+
+startPortraitTimer();
+
+  const audioList = document.getElementById('audio-list');
+  const volSlider = document.getElementById('volume-slider');
+
+  let activeAudio = null;
+  let activeItem = null;
+
+  const audioEls = AUDIO_NAMES.map(({ name, ext }) => {
+    const audio = new Audio(`${FOLDER}${name}.${ext}`);
+
+    audio.volume = parseFloat(volSlider.value);
+
+    const item = document.createElement('div');
+
+    item.className = 'audio-item';
+
+    item.innerHTML = `
+      <button class="play-btn" aria-label="${name} abspielen">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+
+      <div class="audio-info">
+        <span class="audio-name">${name}</span>
+
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+
+      <span class="audio-time">0:00 / 0:00</span>
+    `;
+
+    const btn = item.querySelector('.play-btn');
+    const fill = item.querySelector('.progress-fill');
+    const timeEl = item.querySelector('.audio-time');
+    const progBar = item.querySelector('.progress-bar');
+
+    const pauseIcon = `
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <rect x="6" y="4" width="4" height="16"/>
+        <rect x="14" y="4" width="4" height="16"/>
+      </svg>
+    `;
+
+    const playIcon = `
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    `;
+
+    function fmt(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60).toString().padStart(2, '0');
+      return `${m}:${sec}`;
+    }
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        fill.style.width =
+          (audio.currentTime / audio.duration * 100) + '%';
+
+        timeEl.textContent =
+          `${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
+      }
+    });
+
+    audio.addEventListener('ended', () => {
+      item.classList.remove('playing');
+      btn.innerHTML = playIcon;
+
+      activeAudio = null;
+      activeItem = null;
+    });
+
+    progBar.addEventListener('click', e => {
+      if (!audio.duration) return;
+
+      const rect = progBar.getBoundingClientRect();
+
+      audio.currentTime =
+        ((e.clientX - rect.left) / rect.width) * audio.duration;
+    });
+
+    btn.addEventListener('click', () => {
+      if (activeAudio && activeAudio !== audio) {
+        activeAudio.pause();
+
+        activeItem.classList.remove('playing');
+
+        activeItem.querySelector('.play-btn').innerHTML = playIcon;
+      }
+
+      if (audio.paused) {
+        audio.play();
+
+        item.classList.add('playing');
+        btn.innerHTML = pauseIcon;
+
+        activeAudio = audio;
+        activeItem = item;
+
+      } else {
+        audio.pause();
+
+        item.classList.remove('playing');
+        btn.innerHTML = playIcon;
+
+        activeAudio = null;
+        activeItem = null;
+      }
+    });
+
+    audioList.appendChild(item);
+
+    return audio;
+  });
+
+  volSlider.addEventListener('input', () => {
+    const v = parseFloat(volSlider.value);
+
+    audioEls.forEach(a => a.volume = v);
+  });
+</script>
+
+</body>
+</html>
