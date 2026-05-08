@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Portfolio – Erick-Samuel Franz</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet"/>
+
   <style>
     :root {
       --beige:       #f5f0e8;
@@ -15,7 +16,11 @@
       --accent:      #8b7355;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       background: var(--beige);
@@ -102,7 +107,7 @@
       height: 100%;
       object-fit: contain;
       display: block;
-       background: var(--beige-dark);
+      background: var(--beige-dark);
     }
 
     .slide-placeholder {
@@ -137,7 +142,8 @@
       border-radius: 20px;
     }
 
-    .dots {
+    .dots,
+    .portrait-dots {
       display: flex;
       justify-content: center;
       gap: 7px;
@@ -145,7 +151,8 @@
       flex-wrap: wrap;
     }
 
-    .dot {
+    .dot,
+    .portrait-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
@@ -155,58 +162,61 @@
       border: none;
     }
 
-    .dot.active {
+    .dot.active,
+    .portrait-dot.active {
       background: var(--accent);
       transform: scale(1.35);
     }
 
     .portrait-wrap {
-  position: relative;
-  background: var(--beige-dark);
-  border: 1px solid var(--beige-mid);
-  overflow: hidden;
-  aspect-ratio: 3/4;
-}
+      position: relative;
+      background: var(--beige-dark);
+      border: 1px solid var(--beige-mid);
+      overflow: hidden;
+      aspect-ratio: 3/4;
+    }
 
-.portrait-slideshow {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
+    .portrait-slideshow {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
 
-.portrait-slide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: translateX(60px);
-  transition: opacity 0.65s cubic-bezier(.4,0,.2,1),
-              transform 0.65s cubic-bezier(.4,0,.2,1);
-  pointer-events: none;
-}
+    .portrait-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.65s cubic-bezier(.4,0,.2,1),
+                  transform 0.65s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+    }
 
-.portrait-slide.active {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
+    .portrait-slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
 
-.portrait-slide.exit {
-  opacity: 0;
-  transform: translateX(-60px);
-}
+    .portrait-slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
 
-.portrait-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  background: var(--beige-dark);
-}
+    .portrait-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: var(--beige-dark);
+    }
 
     .portrait-placeholder {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -399,9 +409,13 @@
       <div class="dots" id="dots"></div>
     </div>
 
-    <div class="portrait-wrap">
-  <div class="portrait-slideshow" id="portrait-slideshow"></div>
-</div>
+    <div>
+      <div class="portrait-wrap">
+        <div class="portrait-slideshow" id="portrait-slideshow"></div>
+      </div>
+
+      <div class="portrait-dots" id="portrait-dots"></div>
+    </div>
 
   </div>
 
@@ -433,7 +447,14 @@
 
 <script>
   const SLIDE_COUNT = 16;
-  const PORTRAIT_COUNT = 4;
+
+  const PORTRAITS = [
+    'Portrait1.jpeg',
+    'Portrait2.jpeg',
+    'Portrait3.jpeg',
+    'Portrait4.jpeg',
+    'Portrait5.jpeg'
+  ];
 
   const AUDIO_NAMES = [
     { name: 'Lied1', ext: 'mpeg' },
@@ -470,7 +491,6 @@
     ssWrap.appendChild(div);
 
     const dot = document.createElement('button');
-
     dot.className = 'dot' + (i === 1 ? ' active' : '');
     dot.setAttribute('aria-label', `Bild ${i}`);
 
@@ -480,16 +500,16 @@
   }
 
   const counter = document.createElement('div');
-
   counter.className = 'slide-counter';
   counter.textContent = `1 / ${SLIDE_COUNT}`;
-
   ssWrap.appendChild(counter);
 
   const slides = ssWrap.querySelectorAll('.slide');
   const dots = dotsEl.querySelectorAll('.dot');
 
   function goTo(idx) {
+    if (idx === current) return;
+
     const prev = current;
 
     slides[prev].classList.add('exit');
@@ -519,58 +539,59 @@
   }
 
   startTimer();
+
   const portraitWrap = document.getElementById('portrait-slideshow');
+  const portraitDotsEl = document.getElementById('portrait-dots');
 
-let portraitCurrent = 0;
-let portraitTimer;
+  let portraitCurrent = 0;
 
-const portraitExt = i => i <= 5 ? 'jpeg' : 'png';
+  PORTRAITS.forEach((file, index) => {
+    const i = index + 1;
 
-for (let i = 1; i <= PORTRAIT_COUNT; i++) {
-  const ext = portraitExt(i);
+    const div = document.createElement('div');
+    div.className = 'portrait-slide' + (i === 1 ? ' active' : '');
 
-  const div = document.createElement('div');
-  div.className = 'portrait-slide' + (i === 1 ? ' active' : '');
+    div.innerHTML = `
+      <img
+        src="${FOLDER}${file}"
+        alt="Portrait ${i}"
+        onerror="this.parentElement.innerHTML='<div class=\\'portrait-placeholder\\'><span class=\\'icon\\'>✕</span><span>Portrait ${i}</span></div>'"
+      />
+    `;
 
-  div.innerHTML = `
-    <img
-      src="${FOLDER}Portrait${i}.${ext}"
-      alt="Portrait ${i}"
-      onerror="this.parentElement.innerHTML='<div class=\\'portrait-placeholder\\'><span class=\\'icon\\'>✕</span><span>Portrait ${i}</span></div>'"
-    />
-  `;
+    portraitWrap.appendChild(div);
 
-  portraitWrap.appendChild(div);
-}
+    const dot = document.createElement('button');
+    dot.className = 'portrait-dot' + (i === 1 ? ' active' : '');
+    dot.setAttribute('aria-label', `Portrait ${i}`);
 
-const portraitSlides = portraitWrap.querySelectorAll('.portrait-slide');
+    dot.addEventListener('click', () => goToPortrait(index));
 
-function goToPortrait(idx) {
-  const prev = portraitCurrent;
+    portraitDotsEl.appendChild(dot);
+  });
 
-  portraitSlides[prev].classList.add('exit');
-  portraitSlides[prev].classList.remove('active');
+  const portraitSlides = portraitWrap.querySelectorAll('.portrait-slide');
+  const portraitDots = portraitDotsEl.querySelectorAll('.portrait-dot');
 
-  portraitCurrent = idx;
+  function goToPortrait(idx) {
+    if (idx === portraitCurrent) return;
 
-  portraitSlides[portraitCurrent].classList.remove('exit');
-  portraitSlides[portraitCurrent].classList.add('active');
+    const prev = portraitCurrent;
 
-  setTimeout(() => {
-    portraitSlides[prev].classList.remove('exit');
-  }, 700);
-}
+    portraitSlides[prev].classList.add('exit');
+    portraitSlides[prev].classList.remove('active');
+    portraitDots[prev].classList.remove('active');
 
-function nextPortrait() {
-  goToPortrait((portraitCurrent + 1) % PORTRAIT_COUNT);
-}
+    portraitCurrent = idx;
 
-function startPortraitTimer() {
-  clearInterval(portraitTimer);
-  portraitTimer = setInterval(nextPortrait, SLIDE_DELAY);
-}
+    portraitSlides[portraitCurrent].classList.remove('exit');
+    portraitSlides[portraitCurrent].classList.add('active');
+    portraitDots[portraitCurrent].classList.add('active');
 
-startPortraitTimer();
+    setTimeout(() => {
+      portraitSlides[prev].classList.remove('exit');
+    }, 700);
+  }
 
   const audioList = document.getElementById('audio-list');
   const volSlider = document.getElementById('volume-slider');
@@ -584,7 +605,6 @@ startPortraitTimer();
     audio.volume = parseFloat(volSlider.value);
 
     const item = document.createElement('div');
-
     item.className = 'audio-item';
 
     item.innerHTML = `
@@ -661,7 +681,6 @@ startPortraitTimer();
         activeAudio.pause();
 
         activeItem.classList.remove('playing');
-
         activeItem.querySelector('.play-btn').innerHTML = playIcon;
       }
 
